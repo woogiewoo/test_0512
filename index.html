@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+
+
+
+    <style>
+
+
+        body { 
+            background-color: coral;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .line {
+            position: absolute;
+            background-color: wheat;
+        }
+
+        .horizontal {
+            width: 100%;
+            height: 15px;
+        }
+
+        .vertical {
+            width: 15px;
+            height: 100%;
+        }
+
+        .target {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+
+        .target:before {
+            content: ""; /* 문자가 있어야 생성이 되기때문에 공백 문자 넣어준다 */
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            /* 중앙 정렬 꿀팁 : 상하좌우 모두 0 주고 마진 오토 주면 가운데로 온다 */
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            /*  */
+        }
+
+
+        .tag {
+            color: wheat;
+            position: absolute;
+            font-size: 38px;
+            margin: 20px 30px;
+        }
+
+
+
+        /* GSAP 활용해보기  */
+        .star {
+            width: 100px;
+            height: 100px;                        
+            clip-path: polygon(
+            50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
+            50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+            );
+
+            position: absolute;
+        }
+
+        
+
+
+
+    </style>
+
+
+
+
+
+
+</head>
+
+
+<body>
+
+
+<div class="line horizontal"></div>
+<div class="line vertical"></div>
+<div class="target"></div>
+<span class="tag">Hello</span>
+
+
+
+<!-- GSAP 활용해보기 -->
+
+
+
+
+
+
+<script>
+
+    const vertical = document.querySelector('.vertical');
+    const horizontal = document.querySelector('.horizontal');
+    const target = document.querySelector('.target');
+    const tag = document.querySelector('.tag');
+
+    // ➕ 전역에 마우스 위치 저장용 변수
+let mouseX = 0, mouseY = 0;
+
+// ➕ 마우스 움직일 때마다 좌표 갱신
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+
+    /* load : 화면이 읽혀지면, 바로 실행해라 */
+    addEventListener('load', function() { /* load시 한 번만 실행 */
+        const targetRect = target.getBoundingClientRect(); /* 내장함수로서, 해당하는 요소의 좌표값을 가지고 온다 */
+        const targetHalfWidth = targetRect.width / 2; /* 사각형의 반만큼 나눠준다 */
+        const targetHalfHeight = targetRect.height / 2;
+
+        /* 수직 수평선 반값 구하기 */
+        const vHalf = vertical.offsetWidth  / 2;
+        const hHalf = horizontal.offsetHeight / 2;
+
+
+
+
+
+        /* document : html 문서 / window : 실행되는 창 >> window에 document가 실행된다 */
+        document.addEventListener('mousemove', (e) => {   /* 화살표 함수 = 그냥 함수와 같다(e라는 매개변수) >> function() */ /* 마우스 움직일 때마다 실행된다 */
+        /* event, 마우스가 움직일 때마다의 값  */
+            const x = e.clientX; /* x의 좌표값이 x에 할당 */
+            const y = e.clientY; /* y의 좌표값이 y에 할당 */
+            console.log(`${x} ${y}`); /* x,y 좌표값을 e라는 매개변수를 통해 전달 */
+
+            /* 수직 수평선 */
+            vertical.style.transform = `translateX(${x-vHalf}px)`; /* style은 내장속성이고, 그 다음에 무엇이 오느냐로 속성을 바꿔줄 수 있다 */
+            vertical.style.backgroundColor = `hsl(${x} 40% 40%)` /* 색상, 채도, 명도 */
+            horizontal.style.transform = `translateY(${y-hHalf}px)`;
+            horizontal.style.backgroundColor = `hsl(${y} 40% 40%)`
+
+            /* 동그라미 타겟 */
+            target.style.transform = `translate(${x-targetHalfWidth}px, ${y-targetHalfHeight}px)`; /* 사각형의 기준점은 좌측상단 */
+
+            /* 태그 문자 */
+            tag.style.transform = `translate(${x}px, ${y}px)`;
+            tag.innerHTML = `좌표 ${x}px, ${y}px`;
+
+
+        })
+    }) 
+    
+
+
+
+    addEventListener('load', () => {
+  // 별 요소들을 배열로 가져오기
+    const stars = gsap.utils.toArray(".star");
+    stars.forEach(star => {
+    gsap.to(star, {
+      duration: 2 + Math.random() * 3,        // 2~5초 사이 랜덤
+      x: () => Math.random() * (window.innerWidth  - star.offsetWidth),
+      y: () => Math.random() * (window.innerHeight - star.offsetHeight),
+        ease: "power1.inOut",
+        repeat: -1,
+        repeatRefresh: true                     // 매 반복마다 랜덤 좌표 재계산
+        });
+    });
+});
+
+// 1) 랜덤 숫자 뽑는 헬퍼
+function rnd(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// 2) 별 한 개를 만들고 움직이게 하는 함수
+function createStar() {
+  const star = document.createElement('div');
+  star.classList.add('star');
+  
+  // 1) 랜덤 크기
+  const size = rnd(20, 100);
+  star.style.width  = size + 'px';
+  star.style.height = size + 'px';
+
+  // 2) (선택) 랜덤 색 지정
+  const hue = rnd(0, 360);
+  star.style.backgroundColor = `hsl(${hue}, 80%, 60%)`;
+
+  // 3) 출발 좌표
+  const startX = rnd(0, window.innerWidth  - size);
+  const startY = rnd(0, window.innerHeight - size);
+
+  document.body.appendChild(star);
+
+  // 4) 최종 목적지는 마우스 포인터
+  const destX = mouseX - size/2;
+  const destY = mouseY - size/2;
+
+  // 5) 부드럽게 마우스로 모이기
+  gsap.fromTo(star,
+    { x: startX, y: startY },
+    {
+      duration: rnd(1,2),
+      x: destX,
+      y: destY,
+      ease: "power1.out",
+      onComplete: () => star.remove()
+    }
+  );
+}
+
+
+
+
+
+// 3) 일정 간격으로 별 계속 생성
+setInterval(createStar, 300); // 0.3초마다 하나씩 생성
+
+
+
+
+
+</script>
+
+
+
+
+
+
+    
+</body>
+</html>
